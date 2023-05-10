@@ -19,17 +19,18 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 
-class Rabbit{
+class Plane{
     private Label name;
     private double health;
+    private double speed;
     private Line life;
-    private ImageView irabbit;
+    private ImageView iplane;
     private double x, y;
 
     private boolean active;
     private Rectangle rectActive;
 
-    public Rabbit(String n, double h, double _x, double _y ){
+    public Plane(String n, double h, double s, double _x, double _y ){
         x=_x;
         y=_y;
 
@@ -38,13 +39,14 @@ class Rabbit{
         name.setLayoutY(y);
 
         health=h;
+        speed=s;
         life=new Line(x,y+15, x+health,y+15);
         life.setStrokeWidth(5);
         life.setStroke(Color.LIGHTGREEN);
 
-        irabbit=new ImageView(HelloApplication.imgrabbit);
-        irabbit.setX(x);
-        irabbit.setY(y+15+7);
+        iplane=new ImageView(HelloApplication.imgplane);
+        iplane.setX(x);
+        iplane.setY(y+15+7);
 
         active= false;
 
@@ -52,11 +54,11 @@ class Rabbit{
         rectActive.setFill(Color.TRANSPARENT);
         rectActive.setStroke(Color.MAGENTA);
 
-        HelloApplication.group.getChildren().addAll(name, life, irabbit);
+        HelloApplication.group.getChildren().addAll(name, life, iplane);
 
     }
-    public void harakiri(){
-        HelloApplication.group.getChildren().removeAll(name, life, irabbit);
+    public void explode(){
+        HelloApplication.group.getChildren().removeAll(name, life, iplane);
 
         if( active )HelloApplication.group.getChildren().remove(rectActive);
 
@@ -78,7 +80,7 @@ class Rabbit{
     }
 
     public boolean mouseActivate( double mx, double my ){
-       if(irabbit.boundsInParentProperty().get().contains(mx,my)){
+       if(iplane.boundsInParentProperty().get().contains(mx,my)){
            flipActivation();
            return true;
        }
@@ -87,9 +89,10 @@ class Rabbit{
 
     @Override
     public String toString() {
-        return "Rabbit{" +
+        return "Plane{" +
                 "name=" + name.getText() +
                 ", health=" + health +
+                ", speed=" + speed +
                 ", x=" + x +
                 ", y=" + y +
                 '}';
@@ -117,11 +120,19 @@ class Rabbit{
         life.setEndX(x+health);
         life.setEndY(y+15);
 
-//        HelloApplication.group.getChildren().remove(life);
-//        life=new Line(x,y+15, x+health,y+15);
-//        life.setStrokeWidth(5);
-//        life.setStroke(Color.LIGHTGREEN);
-//        HelloApplication.group.getChildren().add(life);
+    }
+
+    public String getSpeed(){
+        return Double.toString(speed) ;
+    }
+    public void setSpeed(String s){
+
+        try {
+            speed= Double.parseDouble(s);
+        }
+        catch(Exception e){
+            speed=0.0;
+        }
     }
 
    public void setCoordinates(){
@@ -134,14 +145,9 @@ class Rabbit{
        life.setEndX(x+health);
        life.setEndY(y+15);
 
-       //        HelloApplication.group.getChildren().remove(life);
-//        life=new Line(x,y+15, x+health,y+15);
-//        life.setStrokeWidth(5);
-//        life.setStroke(Color.LIGHTGREEN);
-//        HelloApplication.group.getChildren().add(life);
 
-       irabbit.setX(x);
-       irabbit.setY(y+15+7);
+       iplane.setX(x);
+       iplane.setY(y+15+7);
 
        rectActive.setX(x-5);
        rectActive.setY(y-5);
@@ -188,8 +194,9 @@ class Rabbit{
     }
 
     public void move( double dx, double dy ){
-        x=x+dx;
-        y=y+dy;
+        double speedFactor = speed / 100;
+        x = x + dx * speedFactor;
+        y = y + dy * speedFactor;
         setCoordinates();
     }
 }
@@ -198,18 +205,19 @@ public class HelloApplication extends Application {
 
     public static Group group= new Group();
 
-    public static Image imgrabbit;
+    public static Image imgplane;
 
     public static int counter=0;
 
-    public static ArrayList<Rabbit> herd = new ArrayList<>();
+    public static ArrayList<Plane> herd = new ArrayList<>();
 
     public static ArrayList<String> getParamsToChange( int index ){
-        Rabbit r= herd.get(index);
+        Plane r= herd.get(index);
 
         ArrayList<String> arr= new ArrayList<String>();
         arr.add( r.getName() );
         arr.add( r.getHealth() );
+        arr.add( r.getSpeed() );
         arr.add( r.getX() );
         arr.add( r.getY() );
         return arr;
@@ -218,26 +226,38 @@ public class HelloApplication extends Application {
     public static ArrayList<String> getNames(){
         ArrayList<String> arr = new ArrayList<>();
 
-        for( Rabbit r:herd ){
+        for( Plane r:herd ){
             arr.add(r.toString() );
         }
 
         return arr;
     }
-    public static void changeRabbit(int rabbitIndex, String sName, String sHealth, String sX, String sY ){
-        Rabbit r= herd.get(rabbitIndex);
+
+    public static ArrayList<Object> getObjName(){
+        ArrayList<Object> arr = new ArrayList<>();
+
+        for( Plane r:herd ){
+            arr.add(r.getName() );
+        }
+
+        return arr;
+    }
+
+    public static void changePlane(int planeIndex, String sName, String sHealth, String sSpeed, String sX, String sY ){
+        Plane r= herd.get(planeIndex);
 
         r.setName(sName);
         r.setHealth(sHealth);
+        r.setSpeed(sSpeed);
         r.setX(sX);
         r.setY(sY);
 
     }
-    public static void createNewRabbit(String sName, String sHealth, String sX, String sY ){
+    public static void createNewPlane(String sName, String sHealth, String sSpeed, String sX, String sY ){
 
-        System.out.printf("sName=%s sHealth=%s sX=%s sY=%s \n", sName, sHealth, sX, sY );
+        System.out.printf("sName=%s sHealth=%s sSpeed=%s sX=%s sY=%s \n", sName, sHealth, sSpeed, sX, sY );
 
-        if( sName.equals("") ) sName="Rabbit";
+        if( sName.equals("") ) sName="Plane";
 
         double h;
         try {
@@ -245,6 +265,14 @@ public class HelloApplication extends Application {
         }
         catch(Exception e){
             h=0.0;
+        }
+
+        double s;
+        try {
+            s= Double.parseDouble(sSpeed);
+        }
+        catch(Exception e){
+            s=0.0;
         }
 
         double x;
@@ -264,17 +292,12 @@ public class HelloApplication extends Application {
             y=0.0;
         }
 
-        HelloApplication.herd.add(new Rabbit(sName,h,x,y) );
+        HelloApplication.herd.add(new Plane(sName,h,s,x,y) );
     }
 
     @Override
     public void start(Stage stage) throws IOException {
-        //FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-        //Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        //stage.setTitle("Hello!");
-
-        //rabbit.png
-        imgrabbit= new Image( HelloApplication.class.getResource("rabbit.png").toString(),
+        imgplane= new Image( HelloApplication.class.getResource("plane.png").toString(),
                 100,100,false,false);
 
 
@@ -283,20 +306,18 @@ public class HelloApplication extends Application {
         scene.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-//                Rabbit r= new Rabbit(   Integer.toString(++counter), 100.0,  mouseEvent.getX(), mouseEvent.getY() );
-//                herd.add(r);
 
                 if( mouseEvent.getButton().equals(MouseButton.SECONDARY) ){
-                    ChooseRabbitToChangeParamsDlg.display(mouseEvent.getX(), mouseEvent.getY());
+                    ChoosePlaneToChangeParamsDlg.display(mouseEvent.getX(), mouseEvent.getY());
                 }
                 else{
                     boolean flg=false;
-                    for( Rabbit r:herd ){
+                    for( Plane r:herd ){
                         if( r.mouseActivate(mouseEvent.getX(), mouseEvent.getY() ) )flg=true;
                     }
 
                     if( flg==false)
-                    RabbitParamsDlg.display(mouseEvent.getX(), mouseEvent.getY() );
+                    PlaneParamsDlg.display(mouseEvent.getX(), mouseEvent.getY() );
                 }
                 System.out.println("Got control back!");
             }
@@ -307,11 +328,11 @@ public class HelloApplication extends Application {
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode().equals(KeyCode.DELETE) )
                 {
-                    ArrayList<Rabbit> tmp = new ArrayList<>();
+                    ArrayList<Plane> tmp = new ArrayList<>();
 
-                    for( Rabbit r:HelloApplication.herd ){
+                    for( Plane r:HelloApplication.herd ){
                         if( r.isActive() ){
-                            r.harakiri();
+                            r.explode();
                         }
                         else{
                             tmp.add(r);
@@ -343,7 +364,7 @@ public class HelloApplication extends Application {
                 }
 
                 if( flg ){
-                    for( Rabbit r:HelloApplication.herd ){
+                    for( Plane r:HelloApplication.herd ){
                         if( r.isActive() ){
                             r.move(dx, dy);
                         }
@@ -362,20 +383,6 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
 
         launch();
-//        String str;
-//        int count=0;
-//
-//        Scanner in = new Scanner(System.in);
-//
-//        do{
-//            System.out.print("Enter string N"+(count+1)+":");
-//            str= in.nextLine();
-//            System.out.println(str);
-//            count++;
-//            if(count==3)launch();
-//
-//        }while(count<5);
-//
 
     }
 }
